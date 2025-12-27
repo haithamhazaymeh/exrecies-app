@@ -14,36 +14,76 @@ class HomeScreen extends StatelessWidget {
         onRefresh: () => context.read<WorkoutProvider>().loadAllData(),
         child: CustomScrollView(
           slivers: [
-            // AppBar مع تدرج
+            // AppBar محسّن مع تدرج
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 220,
               floating: false,
               pinned: true,
+              elevation: 0,
               flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
                 title: const Text(
-                  'خطة التحول البدني 💍',
+                  'رحلتك إلى 80 كجم 🔥',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 22,
+                    letterSpacing: 0.5,
                     shadows: [
                       Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black26,
-                        offset: Offset(2.0, 2.0),
+                        blurRadius: 15.0,
+                        color: Colors.black45,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
                 ),
-                background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.fitness_center,
-                      size: 80,
-                      color: Colors.white24,
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Gradient Background
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                      ),
                     ),
-                  ),
+                    // Overlay Pattern
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.2),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Center Icon
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 20),
+                          Icon(
+                            Icons.fitness_center,
+                            size: 100,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'البداية • التحدي • النجاح',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

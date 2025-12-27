@@ -12,21 +12,55 @@ class AppTheme {
   static const Color textPrimary = Color(0xFF1f2937);
   static const Color textSecondary = Color(0xFF6b7280);
 
-  // تدرجات Gradients
+  // تدرجات Gradients محسّنة
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF1e3a8a), Color(0xFF3b82f6)],
+    colors: [
+      Color(0xFF1e3a8a), // أزرق داكن
+      Color(0xFF3b82f6), // أزرق فاتح
+      Color(0xFF60a5fa), // أزرق أفتح
+    ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient orangeGradient = LinearGradient(
-    colors: [Color(0xFFf97316), Color(0xFFfb923c)],
+    colors: [
+      Color(0xFFf97316), // برتقالي
+      Color(0xFFfb923c), // برتقالي فاتح
+      Color(0xFFfbbf24), // ذهبي
+    ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient redGradient = LinearGradient(
-    colors: [Color(0xFFdc2626), Color(0xFFef4444)],
+    colors: [
+      Color(0xFFdc2626), // أحمر
+      Color(0xFFef4444), // أحمر فاتح
+      Color(0xFFf87171), // وردي محمر
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // تدرج جديد للتقدم والنجاح
+  static const LinearGradient successGradient = LinearGradient(
+    colors: [
+      Color(0xFF059669), // أخضر داكن
+      Color(0xFF10b981), // أخضر
+      Color(0xFF34d399), // أخضر فاتح
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // تدرج شامل ملون
+  static const LinearGradient vibrantGradient = LinearGradient(
+    colors: [
+      Color(0xFF8b5cf6), // بنفسجي
+      Color(0xFFec4899), // وردي
+      Color(0xFFf97316), // برتقالي
+    ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

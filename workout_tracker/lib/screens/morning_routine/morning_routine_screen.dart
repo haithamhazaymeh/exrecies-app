@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/workout_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/exercise.dart';
+import '../workout_session/workout_session_screen.dart';
+import '../exercise_detail/exercise_detail_screen.dart';
 
 class MorningRoutineScreen extends StatelessWidget {
   const MorningRoutineScreen({super.key});
@@ -13,18 +15,70 @@ class MorningRoutineScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 150,
+            expandedHeight: 180,
             floating: false,
             pinned: true,
+            elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
               title: const Text(
-                '☀️ روتين الصباح',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: AppTheme.orangeGradient,
+                'روتين الصباح ☀️',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 20,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 12.0,
+                      color: Colors.black45,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: AppTheme.orangeGradient,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.15),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 15),
+                        const Icon(
+                          Icons.wb_sunny,
+                          size: 70,
+                          color: Colors.white30,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '20 دقيقة • يومياً',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -156,7 +210,12 @@ class MorningRoutineScreen extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          _showExerciseDetails(context, exercise);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ExerciseDetailScreen(exercise: exercise),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -317,10 +376,27 @@ class MorningRoutineScreen extends StatelessWidget {
   }
 
   void _showWorkoutSession(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('جلسة التمرين قيد التطوير... 🚀'),
-        backgroundColor: AppTheme.successGreen,
+    final provider = context.read<WorkoutProvider>();
+    final morningExercises = provider.morningExercises;
+
+    if (morningExercises.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('لا توجد تمارين للبدء!'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+      return;
+    }
+
+    // فتح شاشة جلسة التمرين
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutSessionScreen(
+          exercises: morningExercises,
+          sessionType: 'morning',
+        ),
       ),
     );
   }

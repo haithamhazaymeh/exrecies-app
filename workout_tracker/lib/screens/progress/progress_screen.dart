@@ -30,22 +30,70 @@ class _ProgressScreenState extends State<ProgressScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 150,
+            expandedHeight: 180,
             floating: false,
             pinned: true,
+            elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
               title: const Text(
-                '📊 متابعة التقدم',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.successGreen, Colors.teal],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                'متابعة التقدم 📊',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 20,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 12.0,
+                      color: Colors.black45,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: AppTheme.successGradient,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.15),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 15),
+                        const Icon(
+                          Icons.trending_down,
+                          size: 70,
+                          color: Colors.white30,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'كل كيلو يهم • استمر',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

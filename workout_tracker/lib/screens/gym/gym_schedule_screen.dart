@@ -4,6 +4,7 @@ import '../../providers/workout_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/exercise.dart';
 import '../../services/image_service.dart';
+import '../workout_session/workout_session_screen.dart';
 
 class GymScheduleScreen extends StatefulWidget {
   const GymScheduleScreen({super.key});
@@ -43,40 +44,59 @@ class _GymScheduleScreenState extends State<GymScheduleScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // Header with gradient
+          // Header with enhanced gradient
           Container(
             decoration: const BoxDecoration(
               gradient: AppTheme.primaryGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: SafeArea(
               bottom: false,
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'جدول النادي',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'جدول النادي 🏋️',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 10.0,
+                                      color: Colors.black38,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              '4-5 أيام أسبوعياً 🔥',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                              const SizedBox(height: 6),
+                              Text(
+                                '4-5 أيام أسبوعياً • لا تستسلم 💪',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.3,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -159,6 +179,7 @@ class _GymScheduleScreenState extends State<GymScheduleScreen> {
         },
         icon: const Icon(Icons.play_arrow),
         label: const Text('ابدأ التمرين'),
+        backgroundColor: AppTheme.successGreen,
       ),
     );
   }
@@ -475,10 +496,28 @@ class _GymScheduleScreenState extends State<GymScheduleScreen> {
   }
 
   void _startWorkoutSession(BuildContext context, String day) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('بدء جلسة تمرين ${dayInfo[day]!['title']}... 🔥'),
-        backgroundColor: AppTheme.primaryBlue,
+    final provider = context.read<WorkoutProvider>();
+    final gymExercises = provider.getGymExercisesByDay(day);
+
+    if (gymExercises.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('لا توجد تمارين لـ ${dayInfo[day]!['title']}!'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+      return;
+    }
+
+    // فتح شاشة جلسة التمرين
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutSessionScreen(
+          exercises: gymExercises,
+          sessionType: 'gym',
+          dayName: dayInfo[day]!['title'],
+        ),
       ),
     );
   }
