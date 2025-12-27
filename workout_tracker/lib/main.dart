@@ -68,6 +68,9 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.theme,
         
         // الصفحة الرئيسية
+        routes: {
+          '/manage-exercises': (context) => const ManageExercisesScreen(),
+        },
         home: const MainNavigationScreen(),
         
         // المسارات

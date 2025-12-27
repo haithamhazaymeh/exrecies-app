@@ -285,6 +285,385 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'تطور الوزن',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => _showWeightHistory(context, provider),
+                icon: const Icon(Icons.history, size: 18),
+                label: const Text('السجل'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 200,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(show: true, drawVerticalLine: false),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: const TextStyle(fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: weightLogs
+                        .asMap()
+                        .entries
+                        .map((e) => FlSpot(e.key.toDouble(), e.value.weight))
+                        .toList(),
+                    isCurved: true,
+                    color: AppTheme.primaryBlue,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: true),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: AppTheme.primaryBlue.withOpacity(0.1),
+                    ),
+                  ),
+                  // Target line
+                  LineChartBarData(
+                    spots: List.generate(
+                      weightLogs.length,
+                      (index) => FlSpot(index.toDouble(), 80),
+                    ),
+                    isCurved: false,
+                    color: AppTheme.successGreen,
+                    barWidth: 2,
+                    dotData: const FlDotData(show: false),
+                    dashArray: [5, 5],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWeightHistory(BuildContext context, WorkoutProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) {
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'سجل الوزن',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.separated(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: provider.bodyWeightLogs.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final log = provider.bodyWeightLogs[index];
+                    final previousLog = index < provider.bodyWeightLogs.length - 1
+                        ? provider.bodyWeightLogs[index + 1]
+                        : null;
+                    final change = previousLog != null
+                        ? log.weight - previousLog.weight
+                        : 0.0;
+
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  intl.DateFormat('yyyy-MM-dd').format(log.date),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${log.weight.toStringAsFixed(1)} كجم',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    if (change != 0) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: change < 0
+                                              ? AppTheme.successGreen.withOpacity(0.1)
+                                              : AppTheme.accentRed.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${change > 0 ? '+' : ''}${change.toStringAsFixed(1)}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: change < 0
+                                                ? AppTheme.successGreen
+                                                : AppTheme.accentRed,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                if (log.notes != null && log.notes!.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    log.notes!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _editWeightLog(context, log);
+                                },
+                                icon: const Icon(Icons.edit, size: 20),
+                                color: AppTheme.primaryBlue,
+                              ),
+                              if (provider.bodyWeightLogs.length > 1)
+                                IconButton(
+                                  onPressed: () {
+                                    _deleteWeightLog(context, provider, log);
+                                  },
+                                  icon: const Icon(Icons.delete, size: 20),
+                                  color: AppTheme.accentRed,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _editWeightLog(BuildContext context, BodyWeightLog log) {
+    _weightController.text = log.weight.toString();
+    _notesController.text = log.notes ?? '';
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تعديل الوزن'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'الوزن (كجم)',
+                suffixText: 'كجم',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _notesController,
+              decoration: const InputDecoration(
+                labelText: 'ملاحظات (اختياري)',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final weight = double.tryParse(_weightController.text);
+              if (weight != null) {
+                final updatedLog = log.copyWith(
+                  weight: weight,
+                  notes: _notesController.text.isEmpty ? null : _notesController.text,
+                );
+                
+                context.read<WorkoutProvider>().updateBodyWeightLog(updatedLog);
+                _weightController.clear();
+                _notesController.clear();
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم تحديث الوزن! ✅'),
+                    backgroundColor: AppTheme.successGreen,
+                  ),
+                );
+              }
+            },
+            child: const Text('حفظ'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteWeightLog(BuildContext context, WorkoutProvider provider, BodyWeightLog log) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('حذف القياس'),
+        content: Text(
+          'هل تريد حذف قياس ${log.weight.toStringAsFixed(1)} كجم؟',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              provider.deleteBodyWeightLog(log);
+              Navigator.pop(context);
+              Navigator.pop(context); // Close history sheet
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('تم الحذف'),
+                  backgroundColor: AppTheme.accentRed,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accentRed,
+            ),
+            child: const Text('حذف'),
+          ),
+        ],
+      ),
+    );
+  }
+
+    final weightLogs = provider.bodyWeightLogs.reversed.take(10).toList();
+
+    if (weightLogs.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Column(
+            children: [
+              Icon(Icons.show_chart, size: 64, color: AppTheme.textSecondary),
+              SizedBox(height: 16),
+              Text(
+                'سجل وزنك لعرض الرسم البياني',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           const Text(
             'تطور الوزن',
             style: TextStyle(

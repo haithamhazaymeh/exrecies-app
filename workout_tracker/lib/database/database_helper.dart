@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import '../models/exercise.dart';
 import '../models/workout_log.dart';
 import '../models/body_weight_log.dart';
+import '../models/workout_day.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -70,6 +71,17 @@ class DatabaseHelper {
         id $idType,
         date $textType,
         weight $realType,
+        notes TEXT
+      )
+    ''');
+
+    // جدول أيام التمارين (للكاليندر)
+    await db.execute('''
+      CREATE TABLE workout_days (
+        id $idType,
+        date $textType UNIQUE,
+        type $textType,
+        completed INTEGER DEFAULT 1,
         notes TEXT
       )
     ''');
@@ -304,6 +316,55 @@ class DatabaseHelper {
       };
     }
     return {'max_weight': 0.0, 'max_sets': 0.0};
+  }
+
+  // ==================== عمليات أيام التمارين (للكاليندر) ====================
+
+  Future<int> insertWorkoutDay(WorkoutDay day) async {
+    final db = await instance.database;
+    return await db.insert(
+      'workout_days',
+      day.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<WorkoutDay>> getWorkoutDaysInMonth(DateTime month) async {
+    final db = await instance.database;
+    final firstDay = DateTime(month.year, month.month, 1);
+    final lastDay = DateTime(month.year, month.month + 1, 0);
+    
+    final result = await db.query(
+      'workout_days',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [
+        WorkoutDay._dateToString(firstDay),
+        WorkoutDay._dateToString(lastDay),
+      ],
+    );
+    return result.map((map) => WorkoutDay.fromMap(map)).toList();
+  }
+
+  Future<WorkoutDay?> getWorkoutDay(DateTime date) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'workout_days',
+      where: 'date = ?',
+      whereArgs: [WorkoutDay._dateToString(date)],
+    );
+    if (result.isNotEmpty) {
+      return WorkoutDay.fromMap(result.first);
+    }
+    return null;
+  }
+
+  Future<int> deleteWorkoutDay(DateTime date) async {
+    final db = await instance.database;
+    return await db.delete(
+      'workout_days',
+      where: 'date = ?',
+      whereArgs: [WorkoutDay._dateToString(date)],
+    );
   }
 
   // ==================== إغلاق القاعدة ====================

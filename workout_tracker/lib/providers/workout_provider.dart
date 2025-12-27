@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/exercise.dart';
 import '../models/workout_log.dart';
 import '../models/body_weight_log.dart';
+import '../models/workout_day.dart';
 import '../database/database_helper.dart';
 import '../data/initial_exercises.dart';
 

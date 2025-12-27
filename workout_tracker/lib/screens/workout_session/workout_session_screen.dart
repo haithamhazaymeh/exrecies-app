@@ -147,6 +147,9 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
       sets: completedSets,
     );
 
+    // حفظ يوم التمرين في الكاليندر
+    context.read<WorkoutProvider>().saveWorkoutDay(widget.sessionType);
+
     // عرض شاشة التهنئة
     showDialog(
       context: context,
