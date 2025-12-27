@@ -45,5 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Camera & Photo Library Permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>نحتاج الوصول للكاميرا لالتقاط صور التمارين</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>نحتاج الوصول للمعرض لاختيار صور التمارين</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>نحتاج الوصول للمعرض لحفظ صور التمارين</string>
+	
+	<!-- Calendar Permission -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>نحتاج الوصول للكاليندر لتتبع أيام التمارين</string>
 </dict>
 </plist>
