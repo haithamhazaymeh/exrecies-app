@@ -23,19 +23,20 @@ jobs:
         working-directory: workout_tracker
         run: flutter pub get
 
-      - name: Build iOS (no codesign)
+      - name: Build iOS for simulator
         working-directory: workout_tracker
-        run: flutter build ios --release --no-codesign
+        run: |
+          flutter build ios --release --simulator --no-codesign
           
-      - name: Create IPA
+      - name: Create unsigned IPA
         working-directory: workout_tracker
         run: |
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r ../workout_tracker.ipa Payload
+          cp -r build/ios/iphonesimulator/Runner.app Payload/
+          zip -r ../workout_tracker_unsigned.ipa Payload
           
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: workout-tracker-ipa
-          path: workout_tracker.ipa
+          path: workout_tracker_unsigned.ipa
