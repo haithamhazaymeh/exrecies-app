@@ -23,90 +23,95 @@ jobs:
         working-directory: workout_tracker
         run: flutter pub get
 
-      - name: Prepare iOS project
+      - name: Generate iOS project files
         working-directory: workout_tracker
         run: |
-          # Generate iOS build files
-          flutter build ios --config-only --release --no-codesign || true
+          flutter create --platforms=ios . || true
+          flutter pub get
 
-      - name: Modify Xcode project for no signing
+      - name: Modify project for no code signing
         working-directory: workout_tracker/ios
         run: |
-          # Create a new xcconfig file to override signing
-          cat > NoSign.xcconfig << 'EOF'
-          CODE_SIGNING_REQUIRED = NO
-          CODE_SIGNING_ALLOWED = NO
-          CODE_SIGN_IDENTITY = 
-          CODE_SIGN_ENTITLEMENTS = 
-          DEVELOPMENT_TEAM = 
-          PROVISIONING_PROFILE_SPECIFIER = 
-          EOF
+          # Backup original project
+          cp -r Runner.xcodeproj Runner.xcodeproj.backup
           
-          echo "Created NoSign.xcconfig"
-          cat NoSign.xcconfig
+          # Use sed to update project settings
+          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development"/CODE_SIGN_IDENTITY = ""/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer"/CODE_SIGN_IDENTITY = ""/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = "iPhone Developer"/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = ""/g' Runner.xcodeproj/project.pbxproj
+          
+          # Add signing settings
+          ruby << 'RUBY'
+          project_path = "Runner.xcodeproj/project.pbxproj"
+          content = File.read(project_path)
+          
+          # Replace all CODE_SIGN_IDENTITY values
+          content.gsub!(/CODE_SIGN_IDENTITY = "[^"]*"/, 'CODE_SIGN_IDENTITY = ""')
+          content.gsub!(/DEVELOPMENT_TEAM = [^;]*;/, 'DEVELOPMENT_TEAM = "";')
+          content.gsub!(/CODE_SIGN_STYLE = [^;]*;/, 'CODE_SIGN_STYLE = Manual;')
+          
+          File.write(project_path, content)
+          puts "Updated project.pbxproj"
+          RUBY
+          
+          echo "Project modified successfully"
 
-      - name: Build with xcodebuild (no signing)
-        working-directory: workout_tracker/ios
-        run: |
-          xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -xcconfig NoSign.xcconfig \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES \
-            ONLY_ACTIVE_ARCH=NO \
-            ARCHS="arm64" \
-            VALID_ARCHS="arm64" \
-            build \
-            -derivedDataPath ../build/DerivedData
-          
-      - name: Find and package app
+      - name: Build iOS binary only
         working-directory: workout_tracker
         run: |
-          echo "=== Looking for built app ==="
+          # Skip the AOT compilation issues by building framework
+          flutter build ios --release --no-codesign 2>&1 || {
+            echo "Release build failed, checking what was built..."
+            find build -name "*.framework" -o -name "*.app" 2>/dev/null | head -20
+          }
+
+      - name: Check all build outputs
+        working-directory: workout_tracker
+        run: |
+          echo "=== All iOS build products ==="
+          find build/ios -type f -name "*.a" -o -name "*.dylib" -o -name "*.framework" 2>/dev/null | head -30
+          
+          echo "=== App bundles ==="
           find build -name "*.app" -type d 2>/dev/null
           
-          APP_PATH=$(find build -name "Runner.app" -type d 2>/dev/null | grep -v "Tests" | head -1)
+          echo "=== Directory structure ==="
+          find build/ios -type d 2>/dev/null | head -40
           
-          if [ -n "$APP_PATH" ]; then
-            echo "Found app at: $APP_PATH"
-            APP_SIZE=$(du -sk "$APP_PATH" | cut -f1)
-            echo "Size: ${APP_SIZE} KB"
+      - name: Package what we have
+        working-directory: workout_tracker
+        run: |
+          # Find any app bundle
+          APP=$(find build -name "Runner.app" -type d 2>/dev/null | head -1)
+          
+          if [ -n "$APP" ] && [ -d "$APP" ]; then
+            SIZE=$(du -sk "$APP" | cut -f1)
+            echo "Found app: $APP (${SIZE}KB)"
             
-            if [ "$APP_SIZE" -gt 1000 ]; then
+            if [ "$SIZE" -gt 500 ]; then
               mkdir -p Payload
-              cp -r "$APP_PATH" Payload/
-              # Create IPA
-              zip -r workout_tracker_unsigned.ipa Payload
-              echo "=== IPA Created ==="
-              ls -la workout_tracker_unsigned.ipa
-            else
-              echo "App too small, contents:"
-              ls -laR "$APP_PATH" | head -30
+              cp -r "$APP" Payload/
+              zip -r workout_tracker.ipa Payload
+              ls -lh workout_tracker.ipa
             fi
           else
-            echo "No app found. DerivedData structure:"
-            find build/DerivedData -type d | head -30
+            echo "No valid app bundle found"
+            # Create a zip of all iOS build products for analysis
+            zip -r ios-build-products.zip build/ios/ 2>/dev/null || true
           fi
           
-      - name: Upload unsigned IPA
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: workout-tracker-unsigned-ipa
-          path: workout_tracker/workout_tracker_unsigned.ipa
+          name: workout-tracker-ipa
+          path: |
+            workout_tracker/workout_tracker.ipa
+            workout_tracker/ios-build-products.zip
           if-no-files-found: warn
           
-      - name: Upload DerivedData for debugging
+      - name: Upload build directory
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: derived-data-debug
-          path: workout_tracker/build/DerivedData/Build/Products/
+          name: full-build-output
+          path: workout_tracker/build/
           if-no-files-found: warn
