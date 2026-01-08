@@ -14,6 +14,7 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
+  // Controllers for weight entry dialog
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 

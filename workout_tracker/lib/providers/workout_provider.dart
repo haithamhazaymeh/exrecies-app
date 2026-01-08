@@ -239,4 +239,26 @@ class WorkoutProvider extends ChangeNotifier {
     
     return currentWeight - targetWeight;
   }
+
+  // ==================== عمليات الكاليندر ====================
+
+  Future<void> saveWorkoutDay(String type) async {
+    try {
+      final now = DateTime.now();
+      // نحفظ التاريخ فقط بدون الوقت لتوحيد المقارنة
+      final today = DateTime(now.year, now.month, now.day);
+      
+      final workoutDay = WorkoutDay(
+        date: today,
+        type: type,
+        completed: true,
+      );
+
+      await _dbHelper.insertWorkoutDay(workoutDay);
+      notifyListeners();
+      debugPrint('تم حفظ يوم التمرين: $type في $today');
+    } catch (e) {
+      debugPrint('خطأ في حفظ يوم التمرين: $e');
+    }
+  }
 }
