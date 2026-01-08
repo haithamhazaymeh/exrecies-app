@@ -14,7 +14,7 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  // Controllers for weight entry dialog
+  // تعريف المتحكمات بشكل صريح وواضح
   late final TextEditingController _weightController;
   late final TextEditingController _notesController;
 
@@ -507,7 +507,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               if (provider.bodyWeightLogs.length > 1)
                                 IconButton(
                                   onPressed: () {
-                                    _deleteWeightLog(context, provider, log);
+                                    if (log.id != null) {
+                                      _deleteWeightLog(context, provider, log);
+                                    }
                                   },
                                   icon: const Icon(Icons.delete, size: 20),
                                   color: AppTheme.accentRed,
@@ -530,7 +532,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   void _editWeightLog(BuildContext context, BodyWeightLog log) {
     _weightController.text = log.weight.toString();
     _notesController.text = log.notes ?? '';
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -568,12 +570,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   weight: weight,
                   notes: _notesController.text.isEmpty ? null : _notesController.text,
                 );
-                
+
                 context.read<WorkoutProvider>().updateBodyWeightLog(updatedLog);
                 _weightController.clear();
                 _notesController.clear();
                 Navigator.pop(context);
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('تم تحديث الوزن! ✅'),
@@ -608,7 +610,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 provider.deleteBodyWeightLog(log.id!);
                 Navigator.pop(context);
                 Navigator.pop(context); // Close history sheet
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('تم الحذف'),
@@ -621,124 +623,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
               backgroundColor: AppTheme.accentRed,
             ),
             child: const Text('حذف'),
-          ),
-        ],
-      ),
-    );
-  }
-
-    final weightLogs = provider.bodyWeightLogs.reversed.take(10).toList();
-
-    if (weightLogs.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Column(
-            children: [
-              Icon(Icons.show_chart, size: 64, color: AppTheme.textSecondary),
-              SizedBox(height: 16),
-              Text(
-                'سجل وزنك لعرض الرسم البياني',
-                style: TextStyle(color: AppTheme.textSecondary),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'تطور الوزن',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 200,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(show: true, drawVerticalLine: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toInt().toString(),
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
-                  ),
-                  bottomTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: weightLogs
-                        .asMap()
-                        .entries
-                        .map((e) => FlSpot(e.key.toDouble(), e.value.weight))
-                        .toList(),
-                    isCurved: true,
-                    color: AppTheme.primaryBlue,
-                    barWidth: 3,
-                    dotData: const FlDotData(show: true),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: AppTheme.primaryBlue.withOpacity(0.1),
-                    ),
-                  ),
-                  // Target line
-                  LineChartBarData(
-                    spots: List.generate(
-                      weightLogs.length,
-                      (index) => FlSpot(index.toDouble(), 80),
-                    ),
-                    isCurved: false,
-                    color: AppTheme.successGreen,
-                    barWidth: 2,
-                    dotData: const FlDotData(show: false),
-                    dashArray: [5, 5],
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
