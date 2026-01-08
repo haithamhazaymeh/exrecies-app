@@ -48,13 +48,16 @@ workflows:
           if [ -d "$APP_PATH" ]; then
             echo "Found app at: $APP_PATH"
             cp -r "$APP_PATH" workout_tracker/output/Payload/
-            cd workout_tracker/output
             zip -r workout_tracker.ipa Payload
-            echo "IPA created successfully at $(pwd)/workout_tracker.ipa"
+            
+            # Zip the IPA file so the user gets a clean filename inside
+            zip workout_tracker_final.zip workout_tracker.ipa
+            
+            echo "IPA and Zip created successfully"
           else
             echo "Failed to find Runner.app"
             find $HOME/Library/Developer/Xcode/DerivedData -maxdepth 3
             exit 1
           fi
     artifacts:
-      - workout_tracker/output/*.ipa
+      - workout_tracker/output/*.zip
