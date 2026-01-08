@@ -338,8 +338,8 @@ class DatabaseHelper {
       'workout_days',
       where: 'date >= ? AND date <= ?',
       whereArgs: [
-        WorkoutDay._dateToString(firstDay),
-        WorkoutDay._dateToString(lastDay),
+        WorkoutDay.dateToString(firstDay),
+        WorkoutDay.dateToString(lastDay),
       ],
     );
     return result.map((map) => WorkoutDay.fromMap(map)).toList();
@@ -350,7 +350,7 @@ class DatabaseHelper {
     final result = await db.query(
       'workout_days',
       where: 'date = ?',
-      whereArgs: [WorkoutDay._dateToString(date)],
+      whereArgs: [WorkoutDay.dateToString(date)],
     );
     if (result.isNotEmpty) {
       return WorkoutDay.fromMap(result.first);
@@ -363,7 +363,7 @@ class DatabaseHelper {
     return await db.delete(
       'workout_days',
       where: 'date = ?',
-      whereArgs: [WorkoutDay._dateToString(date)],
+      whereArgs: [WorkoutDay.dateToString(date)],
     );
   }
 

@@ -19,7 +19,7 @@ class WorkoutDay {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'date': _dateToString(date),
+      'date': dateToString(date),
       'type': type,
       'completed': completed ? 1 : 0,
       'notes': notes,
@@ -29,36 +29,22 @@ class WorkoutDay {
   factory WorkoutDay.fromMap(Map<String, dynamic> map) {
     return WorkoutDay(
       id: map['id'] as int?,
-      date: _stringToDate(map['date'] as String),
+      date: stringToDate(map['date'] as String),
       type: map['type'] as String,
       completed: (map['completed'] as int) == 1,
       notes: map['notes'] as String?,
     );
   }
 
-  WorkoutDay copyWith({
-    int? id,
-    DateTime? date,
-    String? type,
-    bool? completed,
-    String? notes,
-  }) {
-    return WorkoutDay(
-      id: id ?? this.id,
-      date: date ?? this.date,
-      type: type ?? this.type,
-      completed: completed ?? this.completed,
-      notes: notes ?? this.notes,
-    );
-  }
+  // ... copyWith ...
 
   /// تحويل DateTime إلى String بصيغة yyyy-MM-dd
-  static String _dateToString(DateTime date) {
+  static String dateToString(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   /// تحويل String إلى DateTime
-  static DateTime _stringToDate(String dateStr) {
+  static DateTime stringToDate(String dateStr) {
     final parts = dateStr.split('-');
     return DateTime(
       int.parse(parts[0]),
@@ -87,6 +73,6 @@ class WorkoutDay {
 
   @override
   String toString() {
-    return 'WorkoutDay{id: $id, date: ${_dateToString(date)}, type: $type, completed: $completed}';
+    return 'WorkoutDay{id: $id, date: ${dateToString(date)}, type: $type, completed: $completed}';
   }
 }

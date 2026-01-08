@@ -32,6 +32,10 @@ class WorkoutProvider extends ChangeNotifier {
   List<Exercise> getExercisesByDay(String day) =>
       _exercises.where((e) => e.day == day).toList();
 
+  // الحصول على تمارين النادي ليوم معين
+  List<Exercise> getGymExercisesByDay(String day) =>
+      _exercises.where((e) => e.type == 'gym' && e.day == day).toList();
+
   // الحصول على أحدث وزن للجسم
   BodyWeightLog? get latestBodyWeight =>
       _bodyWeightLogs.isNotEmpty ? _bodyWeightLogs.first : null;

@@ -67,10 +67,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         
-        // الصفحة الرئيسية
-        routes: {
-          '/manage-exercises': (context) => const ManageExercisesScreen(),
-        },
         home: const MainNavigationScreen(),
         
         // المسارات
