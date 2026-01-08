@@ -604,16 +604,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              provider.deleteBodyWeightLog(log);
-              Navigator.pop(context);
-              Navigator.pop(context); // Close history sheet
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم الحذف'),
-                  backgroundColor: AppTheme.accentRed,
-                ),
-              );
+              if (log.id != null) {
+                provider.deleteBodyWeightLog(log.id!);
+                Navigator.pop(context);
+                Navigator.pop(context); // Close history sheet
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم الحذف'),
+                    backgroundColor: AppTheme.accentRed,
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accentRed,
