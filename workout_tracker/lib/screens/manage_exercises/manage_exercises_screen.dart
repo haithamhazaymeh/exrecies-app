@@ -455,7 +455,6 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
         descriptionEn: _descEnController.text.isEmpty ? null : _descEnController.text,
         type: _type,
         day: _day,
-        day: _day,
         targetSets: int.parse(_setsController.text),
         targetReps: _repsController.text,
         imagePath: _selectedImage?.path ?? _currentImagePath,
