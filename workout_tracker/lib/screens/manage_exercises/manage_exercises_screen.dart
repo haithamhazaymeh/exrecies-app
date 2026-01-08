@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/workout_provider.dart';
 import '../../models/exercise.dart';
 import '../../theme/app_theme.dart';
+import '../../services/image_service.dart';
+import 'dart:io';
 
 class ManageExercisesScreen extends StatelessWidget {
   const ManageExercisesScreen({super.key});
@@ -194,6 +196,9 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
   String? _day;
   String _category = 'posture';
   String _difficulty = 'متوسط';
+  
+  File? _selectedImage;
+  String? _currentImagePath;
 
   @override
   void initState() {
@@ -212,6 +217,7 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
       _day = ex.day;
       _category = ex.category;
       _difficulty = ex.difficulty ?? 'متوسط';
+      _currentImagePath = ex.imagePath;
     }
   }
 
@@ -239,6 +245,8 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _buildImagePicker(),
+            const SizedBox(height: 24),
             TextFormField(
               controller: _nameArController,
               decoration: const InputDecoration(
@@ -351,6 +359,90 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
     );
   }
 
+  Widget _buildImagePicker() {
+    return Center(
+      child: GestureDetector(
+        onTap: _showImageSourceDialog,
+        child: Container(
+          width: 150,
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.5)),
+            image: _selectedImage != null
+                ? DecorationImage(
+                    image: FileImage(_selectedImage!),
+                    fit: BoxFit.cover,
+                  )
+                : (_currentImagePath != null && _currentImagePath!.isNotEmpty && File(_currentImagePath!).existsSync())
+                    ? DecorationImage(
+                        image: FileImage(File(_currentImagePath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+          ),
+          child: (_selectedImage == null && (_currentImagePath == null || _currentImagePath!.isEmpty || !File(_currentImagePath!).existsSync()))
+              ? const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                    SizedBox(height: 8),
+                    Text('إضافة صورة', style: TextStyle(color: Colors.grey)),
+                  ],
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('التقاط صورة'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(true);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('اختيار من المعرض'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(false);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(bool fromCamera) async {
+    try {
+      final image = fromCamera
+          ? await ImageService.instance.captureImage()
+          : await ImageService.instance.pickImageFromGallery();
+      
+      if (image != null) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ في اختيار الصورة: $e')),
+      );
+    }
+  }
+
   void _save() {
     if (_formKey.currentState!.validate()) {
       final exercise = Exercise(
@@ -363,8 +455,10 @@ class _ExerciseFormScreenState extends State<ExerciseFormScreen> {
         descriptionEn: _descEnController.text.isEmpty ? null : _descEnController.text,
         type: _type,
         day: _day,
+        day: _day,
         targetSets: int.parse(_setsController.text),
         targetReps: _repsController.text,
+        imagePath: _selectedImage?.path ?? _currentImagePath,
         category: _category,
         targetMuscle: _targetMuscleController.text.isEmpty ? null : _targetMuscleController.text,
         difficulty: _difficulty,

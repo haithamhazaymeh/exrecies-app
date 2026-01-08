@@ -49,11 +49,14 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 children: [
                   // صورة التمرين أو gradient
                   if (exercise.imagePath != null)
-                    Image.file(
-                      File(exercise.imagePath!),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildGradientBackground(),
+                    GestureDetector(
+                      onTap: () => _showFullScreenImage(context, exercise.imagePath!),
+                      child: Image.file(
+                        File(exercise.imagePath!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildGradientBackground(),
+                      ),
                     )
                   else
                     _buildGradientBackground(),
@@ -342,6 +345,41 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       ],
     );
   }
+
+  void _showFullScreenImage(BuildContext context, String imagePath) {
+    if (!File(imagePath).existsSync()) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            InteractiveViewer(
+              panEnabled: true,
+              minScale: 0.5,
+              maxScale: 4,
+              child: Image.file(
+                File(imagePath),
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildChip({required String label, required Color color}) {
     return Chip(

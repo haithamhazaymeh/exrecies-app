@@ -12,6 +12,8 @@ workflows:
         script: |
           cd workout_tracker
           flutter pub get
+          # Generate icons ensuring they exist for the build
+          flutter pub run flutter_launcher_icons
       - name: Install Pods
         script: |
           cd workout_tracker/ios

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_theme.dart';
 import '../../services/notification_service.dart';
+import '../manage_exercises/manage_exercises_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -246,6 +247,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_left),
             onTap: () {
               _showOfficeWorkTipsDialog();
+            },
+          ),
+          const Divider(height: 1),
+
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryBlue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.edit_note, color: AppTheme.primaryBlue),
+            ),
+            title: const Text('إدارة التمارين'),
+            subtitle: const Text('إضافة وتعديل وحذف التمارين'),
+            trailing: const Icon(Icons.chevron_left),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ManageExercisesScreen()),
+              );
             },
           ),
         ],
