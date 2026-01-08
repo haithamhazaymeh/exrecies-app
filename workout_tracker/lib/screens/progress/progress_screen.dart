@@ -15,8 +15,15 @@ class ProgressScreen extends StatefulWidget {
 
 class _ProgressScreenState extends State<ProgressScreen> {
   // Controllers for weight entry dialog
-  final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _weightController;
+  late final TextEditingController _notesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _weightController = TextEditingController();
+    _notesController = TextEditingController();
+  }
 
   @override
   void dispose() {

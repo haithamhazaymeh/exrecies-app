@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/exercise.dart';
 import '../../theme/app_theme.dart';
 import '../../services/image_service.dart';
+import 'dart:io';
 
 class ExerciseDetailScreen extends StatefulWidget {
   final Exercise exercise;
@@ -49,7 +50,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                   // صورة التمرين أو gradient
                   if (exercise.imagePath != null)
                     Image.file(
-                      ImageService.getImageFile(exercise.imagePath!),
+                      File(exercise.imagePath!),
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           _buildGradientBackground(),
@@ -431,7 +432,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   Future<void> _addImageFromCamera() async {
-    final imagePath = await ImageService.pickImage(source: 'camera');
+    final imagePath = await ImageService.instance.captureImage();
     if (imagePath != null) {
       // تحديث التمرين في قاعدة البيانات
       ScaffoldMessenger.of(context).showSnackBar(
@@ -441,7 +442,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   Future<void> _addImageFromGallery() async {
-    final imagePath = await ImageService.pickImage(source: 'gallery');
+    final imagePath = await ImageService.instance.pickImageFromGallery();
     if (imagePath != null) {
       // تحديث التمرين في قاعدة البيانات
       ScaffoldMessenger.of(context).showSnackBar(
