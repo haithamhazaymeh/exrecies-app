@@ -34,29 +34,21 @@ workflows:
       - name: Package IPA manually
         script: |
           mkdir -p workout_tracker/output/Payload
-          
           echo "Finding the app bundle..."
-          # Look in the user's DerivedData (Standard Xcode location)
-          # using $HOME is safer than relative paths
           APP_PATH=$(find $HOME/Library/Developer/Xcode/DerivedData -name "Runner.app" -type d | grep "Release-iphoneos" | head -1)
-          
           if [ -z "$APP_PATH" ]; then
-             echo "Trying local search..."
-             APP_PATH=$(find . -name "Runner.app" -type d | grep "Release-iphoneos" | head -1)
+            echo "Trying local search..."
+            APP_PATH=$(find . -name "Runner.app" -type d | grep "Release-iphoneos" | head -1)
           fi
-          
           if [ -d "$APP_PATH" ]; then
             echo "Found app at: $APP_PATH"
             cp -r "$APP_PATH" workout_tracker/output/Payload/
+            cd workout_tracker/output
             zip -r workout_tracker.ipa Payload
-            
-            # Zip the IPA file so the user gets a clean filename inside
             zip workout_tracker_final.zip workout_tracker.ipa
-            
             echo "IPA and Zip created successfully"
           else
             echo "Failed to find Runner.app"
-            find $HOME/Library/Developer/Xcode/DerivedData -maxdepth 3
             exit 1
           fi
     artifacts:
