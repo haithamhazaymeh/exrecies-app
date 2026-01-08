@@ -1,0 +1,36 @@
+workflows:
+  ios-workflow:
+    name: iOS Build for AltStore
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          cd workout_tracker
+          flutter pub get
+      - name: Install Pods
+        script: |
+          cd workout_tracker/ios
+          pod install --repo-update
+      - name: Build iOS without signing
+        script: |
+          cd workout_tracker
+          # Build .app bundle
+          flutter build ios --release --no-codesign
+      - name: Package IPA for AltStore
+        script: |
+          cd workout_tracker
+          mkdir -p output/Payload
+          # Find the .app and copy it
+          APP_PATH=$(find build/ios -name "Runner.app" -type d | head -1)
+          echo "Found app at: $APP_PATH"
+          cp -r "$APP_PATH" output/Payload/
+          # Zip it up
+          cd output
+          zip -r workout_tracker.ipa Payload
+    artifacts:
+      - workout_tracker/output/*.ipa
